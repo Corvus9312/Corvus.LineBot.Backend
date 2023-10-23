@@ -1,4 +1,5 @@
 ﻿using Corvus.LineBot.Backend.Helpers;
+using Corvus.LineBot.Backend.Models;
 using isRock.LineBot;
 using static Corvus.LineBot.Backend.Enums.LineEnum;
 
@@ -32,50 +33,44 @@ public class LineBotService
             var userMsg = e.message.text;
 
             var replayMsg = string.Empty;
-            if (e.type.ToLower().Equals("message"))
-            {
-                var msgType = (MessageType)Enum.Parse(typeof(MessageType), e.message.type);
+            var msgType = (MessageType)Enum.Parse(typeof(MessageType), e.message.type);
 
-                // message type explain:https://developers.line.biz/en/docs/messaging-api/message-types/
-                switch (msgType)
-                {
-                    case MessageType.text:
-                        if (userMsg.ToLower().StartsWith("gpt:"))
-                        {
-                            var msg = userMsg.Remove(0, 4);
-                            replayMsg = await _gpt.PostGPT(msg);
-                        }
-                        else
-                        {
-                            replayMsg = $"收到文字：{userMsg}";
-                        }
-                        break;
-                    case MessageType.image:
-                        var fileBody = _linebot.GetUserUploadedContent(e.message.id);
-                        replayMsg = $"收到圖片：大小為：{fileBody.Length} bytes。";
-                        break;
-                    case MessageType.video:
-                        break;
-                    case MessageType.audio:
-                        break;
-                    case MessageType.file:
-                        break;
-                    case MessageType.location:
-                        break;
-                    case MessageType.sticker:
-                        replayMsg = $"你收到了貼圖，貼圖為：{e.message.stickerId}";
-                        break;
-                    default:
-                        replayMsg = $"收到事件：{e.type}，type：{e.message.type}";
-                        break;
-                }
-            }
-            else
+            // message type explain:https://developers.line.biz/en/docs/messaging-api/message-types/
+            switch (msgType)
             {
-                replayMsg = $"收到事件：{e.type}，type：{e.message.type}";
+                case MessageType.text:
+                    if (userMsg.ToLower().StartsWith("gpt:"))
+                    {
+                        var msg = userMsg.Remove(0, 4);
+                        replayMsg = await _gpt.PostGPT(msg);
+                    }
+                    else
+                    {
+                        replayMsg = $"收到文字：{userMsg}";
+                    }
+                    break;
+                case MessageType.image:
+                    var fileBody = _linebot.GetUserUploadedContent(e.message.id);
+                    replayMsg = $"收到圖片：大小為：{fileBody.Length} bytes。";
+                    break;
+                case MessageType.video:
+                    break;
+                case MessageType.audio:
+                    break;
+                case MessageType.file:
+                    break;
+                case MessageType.location:
+                    break;
+                case MessageType.sticker:
+                    replayMsg = $"你收到了貼圖，貼圖為：{e.message.stickerId}";
+                    break;
+                default:
+                    break;
             }
 
             bot.ReplyMessage(replyToken, replayMsg);
         }
     }
+
+    public string PushMessage(PostMessageReqVM req) => _linebot.PushMessage(req.To, req.Message);
 }

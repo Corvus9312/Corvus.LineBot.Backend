@@ -6,14 +6,18 @@ public class LineBotHelper
 {
     private readonly string _channelAccessToken;
     private readonly string _developerLineID;
+    private readonly string _developerUserID;
 
     public LineBotHelper(IConfiguration config)
     {
         _channelAccessToken = config.GetSection("LineAccessToken").Value;
         _developerLineID = config.GetSection("DeveloperLineID").Value;
+        _developerUserID = config.GetSection("DeveloperUserID").Value;
     }
 
     public string GetDeveloperLineID() => _developerLineID;
+
+    public string GetDeveloperUserID() => _developerUserID;
 
     public string GetChannelAccessToken() => _channelAccessToken;
 

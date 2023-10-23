@@ -1,4 +1,5 @@
-﻿using Corvus.LineBot.Backend.Services;
+﻿using Corvus.LineBot.Backend.Models;
+using Corvus.LineBot.Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Corvus.LineBot.Backend.Controllers
@@ -24,6 +25,13 @@ namespace Corvus.LineBot.Backend.Controllers
             return Ok();
         }
 
+        [HttpPost]
+        public IActionResult PushMessage(PostMessageReqVM req)
+        {
+            var result = _linebot.PushMessage(req);
+
+            return Ok(result);
+        }
 
         [HttpGet]
         public async Task<IActionResult> GptPost()
