@@ -6,7 +6,7 @@ public class GptResVM
     public string @object { get; set; } = null!;
     public int created { get; set; }
     public string model { get; set; } = null!;
-    public List<Choice> choices { get; set; } = null!;
+    public List<Choice> choices { get; set; } = new();
 
     public Usage usage { get; set; } = null!;
 }

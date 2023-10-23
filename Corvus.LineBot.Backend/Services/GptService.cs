@@ -37,24 +37,33 @@ public class GptService
         {
             messages = messages,
             temperature = 0.7,
-            max_tokens = 60,
+            max_tokens = 500,
             top_p = 1,
             frequency_penalty = 0,
             presence_penalty = 0
         };
 
-        string requestJson = JsonSerializer.Serialize(requestDatas);
-        var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+        var result = string.Empty; 
+        GptResVM resData = new();
+        var isFrist = true;
+        while (isFrist || (!resData.choices.FirstOrDefault()?.finish_reason.Equals("stop") ?? true))
+        {
+            isFrist = false;
 
-        // 發送 POST 請求
-        var response = await httpClient.PostAsync($"https://api.openai.com/v1/chat/completions", content);
+            string requestJson = JsonSerializer.Serialize(requestDatas);
+            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
-        // 讀取回應資料
-        var responseJson = await response.Content.ReadAsStringAsync();
+            var response = await httpClient.PostAsync($"https://api.openai.com/v1/chat/completions", content);
 
-        // 解析回應資料
-        var personData = JsonSerializer.Deserialize<GptResVM>(responseJson) ?? throw new NullReferenceException("respons msg is null");
+            var responseJson = await response.Content.ReadAsStringAsync();
 
-        return personData.choices.FirstOrDefault()?.message.content ?? string.Empty;
+            resData = JsonSerializer.Deserialize<GptResVM>(responseJson) ?? throw new NullReferenceException("respons msg is null");
+
+            result += $"{resData.choices.FirstOrDefault()?.message.content}";
+
+            requestDatas.messages.Add(new GptMessage { role = $"{Role.assistant}", content = resData.choices.FirstOrDefault()?.message.content ?? string.Empty });
+        }
+
+        return result;
     }
 }

@@ -34,10 +34,9 @@ namespace Corvus.LineBot.Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GptPost()
+        public async Task<IActionResult> GptPost(string msg)
         {
-            //var result = await _gpt.PostGPT("你好！");
-            var result = await _gpt.PostGPT("如何使用chatGpt api");
+            var result = await _gpt.PostGPT(msg);
 
             return Ok(result);
         }
