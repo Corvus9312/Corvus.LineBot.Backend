@@ -9,35 +9,34 @@ namespace Corvus.LineBot.Backend.Services;
 public class GptService
 {
     private readonly string _key;
+    private readonly ChatDataService _chatData;
 
-    public GptService(IConfiguration config)
+    public GptService(IConfiguration config, ChatDataService chatData)
     {
         _key = config.GetSection("GptApiKey").Value;
+        _chatData = chatData;
     }
 
-    public async Task<string> PostGPT(string message)
+    public async Task<string> PostGPT(string userID, string message)
     {
-        var messages = new List<GptMessage>
-        {
-            new GptMessage
-            {
-                role = $"{Role.user}",
-                content = message
-            }
-        };
+        var chatData = _chatData.GetChatDatas().SingleOrDefault(x => x.UserID.Equals(userID)) ?? new() { UserID = userID };
 
-        // 建立 HttpClient 物件
+        var messages = chatData.GptMessages;
+        messages.Add(new GptMessage
+        {
+            role = $"{Role.user}",
+            content = message
+        });
+
         HttpClient httpClient = new();
 
-        // 加入 API Key 到 HTTP 請求標頭中
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _key);
 
-        // 設定要發送的資料
         var requestDatas = new GptReqVM
         {
             messages = messages,
             temperature = 0.7,
-            max_tokens = 500,
+            max_tokens = 300,
             top_p = 1,
             frequency_penalty = 0,
             presence_penalty = 0
@@ -63,6 +62,11 @@ public class GptService
 
             requestDatas.messages.Add(new GptMessage { role = $"{Role.assistant}", content = resData.choices.FirstOrDefault()?.message.content ?? string.Empty });
         }
+
+        chatData.GptMessages = requestDatas.messages;
+        chatData.LastModifyTime = DateTime.Now;
+
+        _chatData.SetChatDataMessage(chatData);
 
         return result;
     }

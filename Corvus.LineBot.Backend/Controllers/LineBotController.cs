@@ -36,7 +36,7 @@ namespace Corvus.LineBot.Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GptPost(string msg)
         {
-            var result = await _gpt.PostGPT(msg);
+            var result = await _gpt.PostGPT("Corvus", msg);
 
             return Ok(result);
         }

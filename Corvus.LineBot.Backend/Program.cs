@@ -19,6 +19,8 @@ public class Program
 
         services.AddScoped<LineBotHelper>();
 
+        services.AddSingleton<ChatDataService>();
+
         services.AddScoped<LineBotService>();
         services.AddScoped<GptService>();
 

@@ -28,11 +28,11 @@ public class LineBotService
         foreach (var e in rcvMsg.events)
         {
             var replyToken = e.replyToken;
-            // var userId = e.source.userId;
+            var userID = e.source.userId;
             // var userName = bot.GetUserInfo(userId).displayName;
             var userMsg = e.message.text;
 
-            var replayMsg = string.Empty;
+            var replyMsg = string.Empty;
             var msgType = (MessageType)Enum.Parse(typeof(MessageType), e.message.type);
 
             // message type explain:https://developers.line.biz/en/docs/messaging-api/message-types/
@@ -41,17 +41,17 @@ public class LineBotService
                 case MessageType.text:
                     if (userMsg.ToLower().StartsWith("gpt:"))
                     {
-                        var msg = userMsg.Remove(0, 4);
-                        replayMsg = await _gpt.PostGPT(msg);
+                        var message = userMsg.Remove(0, 4);
+                        replyMsg = await _gpt.PostGPT(userID, message);
                     }
                     else
                     {
-                        replayMsg = $"收到文字：{userMsg}";
+                        replyMsg = $"收到文字：{userMsg}";
                     }
                     break;
                 case MessageType.image:
                     var fileBody = _linebot.GetUserUploadedContent(e.message.id);
-                    replayMsg = $"收到圖片：大小為：{fileBody.Length} bytes。";
+                    replyMsg = $"收到圖片：大小為：{fileBody.Length} bytes。";
                     break;
                 case MessageType.video:
                     break;
@@ -62,13 +62,13 @@ public class LineBotService
                 case MessageType.location:
                     break;
                 case MessageType.sticker:
-                    replayMsg = $"你收到了貼圖，貼圖為：{e.message.stickerId}";
+                    replyMsg = $"你收到了貼圖，貼圖為：{e.message.stickerId}";
                     break;
                 default:
                     break;
             }
 
-            bot.ReplyMessage(replyToken, replayMsg);
+            bot.ReplyMessage(replyToken, replyMsg);
         }
     }
 
